@@ -15,8 +15,8 @@ provider "aws" {
 resource "aws_vpc" "myVPC"{
     cidr_block = "10.0.0.0/16"
     instance_tenancy = "default"
-    enable_dns_support = true
-    enable_dns_hostnames = true
+    enable_dns_support = true # VPC 설정 편집 > DNS 확인 활성화 허용
+    enable_dns_hostnames = true # VPC 설정 편집 > DNS 호스트 이름 활성화
 
 
     tags ={
@@ -29,7 +29,7 @@ resource "aws_vpc" "myVPC"{
 resource "aws_subnet" "myPublicSubnet" {
   vpc_id     = aws_vpc.myVPC.id
   cidr_block = "10.0.1.0/24"
-  map_public_ip_on_launch=true
+  map_public_ip_on_launch=true # 서브넷 설정 편짐 > 퍼블릭 IPv4 주소 자동 할당 활성화
 
   tags = {
     Name = "myPublicSubnet"
