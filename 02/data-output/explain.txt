@@ -1,0 +1,8 @@
+output으로 원하는 데이터 출력
+
+terraform state list
+terraform state show module.ec2_instances.aws_instance.app[0]
+
+terraform output -json
+terraform output lb_url
+terraform output -raw lb_url
