@@ -6,3 +6,6 @@ terraform state show module.ec2_instances.aws_instance.app[0]
 terraform output -json
 terraform output lb_url
 terraform output -raw lb_url
+
+cat terraform.tfstate
+
