@@ -14,3 +14,6 @@ Terraform - AWS 초기 설정
 2) terraform plan
 3) terraform apply
 4) terraform destroy
+
+[참고] URL (필수)
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs
