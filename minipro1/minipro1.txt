@@ -1,0 +1,49 @@
+### userdata부분에서 로그 저장하는 파일 따로 만들어두면 좋음.
+------------------------------------------------------------------
+
+=========== 구성 이후 ===========
+
+ssh -i ~/.ssh/leekey ubuntu@54.180.234.12 -A // vscode 원격 접속 설정
+/home/tf/.ssh/config // config 파일저장 경로 선택
+구성 열기
+
+cd ~/.ssh
+chmod 600 config // 본인 외 권한 제거
+
+새창에서 연결
+상단에 터미널
+mkdir dev
+폴더 열기 > /home/ubuntu/dev   확인
+
+'docker' 확장 설치 // which docker, sudo systemctl status docker
+
+
+-----------------------------------------------------------
+# 템플릿 파일 설정(동적 데이터저장)
+vi linux-ssh-config.tpl
+
+cat ~/.ssh/config > linux-ssh-config.tpl
+==================================
+vi linux-ssh-config.tpl
+# ~/.ssh/config 파일 생성
+cat <<EOF >> ~/.ssh/config
+HOST ${hostname}
+	HostNAme ${hostname}
+	IdentityFile ${identityfile}
+	User ${user}
+	ForwardAgent yes
+EOF
+
+# ~/.ssh/config 파일 퍼미션 설정
+chmod 600 ~/.ssh/config
+===================================
+[vscode]
+provisioner "local-exec" {
+    command = templatefile("linux-ssh-config.tpl",{
+      hostname = self.public_ip,
+      user = "ubuntu",
+      identityfile = "~/.ssh/leekey"
+    })
+    interpreter = [ "bash","-c" ]
+    # interpreter = ["Powershell", "-Command"]
+  }

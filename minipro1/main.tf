@@ -44,6 +44,7 @@ resource "aws_internet_gateway" "myIGW" {
 resource "aws_subnet" "myPubSN" {
   vpc_id     = aws_vpc.myVPC.id
   cidr_block = "10.0.1.0/24"
+  availability_zone = "ap-northeast-2a"
   map_public_ip_on_launch = true
   tags = var.myPubSN_tags
 }
@@ -53,7 +54,7 @@ resource "aws_route_table" "myPubRT" {
   vpc_id = aws_vpc.myVPC.id
 
   route {
-    cidr_block = "0.0.0.0/24"
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.myIGW.id
   }
 
@@ -127,10 +128,22 @@ resource "aws_instance" "myDocker" {
   key_name = aws_key_pair.myleekey.key_name
   vpc_security_group_ids = [aws_security_group.mySG.id]
   subnet_id = aws_subnet.myPubSN.id
-  #user_data = file()
+  user_data = file("userdata.tpl")
+  user_data_replace_on_change = true
+
   tags = var.myDocker_tags
+
+  provisioner "local-exec" {
+    command = templatefile("linux-ssh-config.tpl",{
+      hostname = self.public_ip,
+      user = "ubuntu",
+      identityfile = "~/.ssh/leekey"
+    })
+    interpreter = [ "bash","-c" ]
+    # interpreter = ["Powershell", "-Command"]
+  }
 }
 
 
 # 접속 
-# ssh -i ~/.ssh/leekey ubuntu@$(tf output -raw ec2_dns_name)
+# ssh -i ~/.ssh/leekey ubuntu@ip
