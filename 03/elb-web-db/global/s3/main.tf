@@ -16,11 +16,11 @@ resource "aws_s3_bucket" "myS3_remote_state" {
 # DynamoDb table 생성
 resource "aws_dynamodb_table" "myDyDB_remote_state" {
   name           = "myDyDB_remote_state"
-  hash_key       = "myLockID"
+  hash_key       = "LockID"
   billing_mode   = "PAY_PER_REQUEST"
 
   attribute {
-    name = "myLockID"
+    name = "LockID"
     type = "S"
   }
 }
