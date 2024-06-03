@@ -1,0 +1,117 @@
+1. Terraform - AWS 초기 설정  [chap 1,2 참고]
+
+1) Linux VM 사용자 생성
+# useradd –G wheel tf
+# echo terraform | passwd —stdin tf
+# sed –i ‘s^%wheel/#%wheel/g’ /etc/sudoers	
+# sed –i ’s/^# %wheel/%wheel/g’ /etc/sudoers
+
+2) 네트워크 설정
+$ sudo nm-connection-editor &
+	* IP: 192.168.10.10/24
+	* GW: 192.168.10.2
+	* DNS: 192.168.10.2
+
+$ sudo nmcli connection up eth0 
+
+3) NTP 설정
+$ sudi vi /etc/chrony.conf
+pool 2.centos.pool.ntp.org iburst
+-> 수정
+server time.bora.net iburst
+
+$ sudo systemctl enable --now chronyd.service
+$ sudo systemctl status chronyd
+$ timedatectl
+-> System clock synchronized: yes 확인
+
+4) 테라폼 설치
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+-> linux(OS 확인하고 설치), fedora
+
+https://developer.hashicorp.com/terraform/downloads
+ㄱ) 패키지 다운로드
+$ sudo yum install -y yum-utils
+
+ㄴ) yum repository 등록
+$ sudo yum-config-manager \
+--add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+-> 자신에 맞는 OS를 보고 등록
+ㄷ) 테라폼 설치
+$ sudo yum -y install terraform
+
+
+5) 테라폼 설정
+cat ~/.bashrc
+complete -C /usr/bin/terraform terraform
+alias tf='terraform'
+
+6) AWS Cli 설치
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+ㄱ) 다운로드
+$ mkdir -p ~/tools && cd ~/tools
+$ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+-o "awscliv2.zip"
+
+ㄴ) 압축 해제
+$ unzip awscliv2.zip
+
+ㄷ) 설치
+$ sudo ./aws/install
+
+ㄹ) .bashrc 설정(자동완성)
+vi ~/.bashrc
+complete -C '/usr/local/bin/aws_completer' aws
+echo "complete -C '/usr/local/bin/aws_completer'
+
+7) 테라폼에서 aws 계정 사용 설정(액세스 키)
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+
+$ cat << EOF >> ~/.bashrc
+
+#
+# Sfecific Configuration
+#
+export AWS_ACCESS_KEY_ID=<ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<SECRET_ACCESS_KEY>
+export AWS_DEFAULT_REGION=us-east-2
+EOF
+
+or
+
+aws configure 사용
+$ cd
+$ aws configure
+-> 
+AWS Access Key ID [None]: <ACCESS_KEY_ID>
+AWS Secret Access Key [None]: <SECRET_ACCESS_KEY>
+Default region name [None]: us-east-2
+Default output format [None]: json
+
+
+정보 확인
+$ tree ~/.aws
+$ cat ~/.aws/config
+$ cat ~/.aws/credentials
+$ aws configure list
+$ aws configure list-profiles
+
+8) 이후 vscode설치후 사용한다.
+vscode 확장 목록
+- aws toolkit
+- korean
+- hashicorp terraform
+- terraform doc snippets
+
+
+
+
+1) terraform init
+2) terraform plan
+3) terraform apply
+4) terraform destroy
+
+[참고] 코드 참고 URL (필수)
+https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+https://developer.hashicorp.com/terraform/language
