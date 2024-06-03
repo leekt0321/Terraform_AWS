@@ -8,4 +8,5 @@ module "myVPC" {
 
 module "myEC2" {
   source = "../modules/ec2"
+  subnet_id = module.myVPC.subnet_id
 }
