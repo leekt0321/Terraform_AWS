@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 # DB 인스턴스 생성
-resource "aws_db_instance" "mtdb_instance" { # mt -> my 오타남..;;
+resource "aws_db_instance" "mydb_instance" { 
   allocated_storage    = 10                  # 10GB
   db_name              = "mydb"
   engine               = "mysql"
