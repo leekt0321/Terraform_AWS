@@ -65,7 +65,7 @@ vi ~/.bashrc
 complete -C '/usr/local/bin/aws_completer' aws
 echo "complete -C '/usr/local/bin/aws_completer'
 
-7) 테라폼에서 aws 계정 사용 설정
+7) 테라폼에서 aws 계정 사용 설정(액세스 키)
 https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 
 $ cat << EOF >> ~/.bashrc
