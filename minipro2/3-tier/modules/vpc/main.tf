@@ -25,6 +25,7 @@ resource "aws_subnet" "myPublic1" {
   vpc_id     = aws_vpc.myVPC.id
   cidr_block = "10.0.1.0/24"
   availability_zone = "ap-northeast-2a"
+  map_public_ip_on_launch = true
   tags = {
     Name = "myPublic1"
   }
@@ -33,6 +34,7 @@ resource "aws_subnet" "myPublic2" {
   vpc_id     = aws_vpc.myVPC.id
   cidr_block = "10.0.2.0/24"
   availability_zone = "ap-northeast-2c"
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "myPublic2"
@@ -53,7 +55,7 @@ resource "aws_subnet" "myPrivate2" {
   availability_zone = "ap-northeast-2c"
   
   tags = {
-    Name = "myPrivate1"
+    Name = "myPrivate2"
   }
 }
 
@@ -198,15 +200,16 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 }
 
 # userdata
-data "terraform_remote_state" "my_remote_state" {
+/*data "terraform_remote_state" "my_remote_state" {
   backend = "s3"
 
   config = {
     bucket="mybucket-lee-1234"
     key = "global/s3/terraform.tfstate"
     region = "ap-northeast-2"
+    dynamodb_table= "myDyDB"
   }
-}
+}*/
 
 # LC
 data "aws_ami" "ubuntu" {
@@ -214,7 +217,7 @@ data "aws_ami" "ubuntu" {
   
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = ["amzn2-ami-kernel-5.10-hvm-2.0.*.0-x86_64-gp2"]
   }
 
   filter {
@@ -222,7 +225,7 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners           = ["099720109477"]
+  owners           = ["137112412989"]
 
 }
 
@@ -231,10 +234,13 @@ resource "aws_launch_configuration" "myLC" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.mySG.id]
-  user_data = templatefile("user_data.sh",{
-    db_address = data.terraform_remote_state.my_remote_state.outputs.address
-    db_port= data.terraform_remote_state.my_remote_state.outputs.port
-  })
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum -y update
+    sudo yum -y install httpd
+    sudo systemctl enable --now httpd
+    echo "<html><body><div>Hello</div></body></html>" > /var/www/html/index.html
+    EOF
 
   lifecycle {
     create_before_destroy = true
