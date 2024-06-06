@@ -234,7 +234,7 @@ resource "aws_launch_configuration" "myLC" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.mySG.id]
-  user_data = file("user_data.sh")
+  user_data = file("~/tf/minipro2/3-tier/modules/vpc/user_data.sh")
 
   lifecycle {
     create_before_destroy = true
@@ -283,7 +283,7 @@ resource "aws_lb" "myALB" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.mySG.id]
-  subnets            = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id,aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id]
+  subnets            = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id] # public만 사용한다.(private x)
 
   tags = {
     Name="myALB"
