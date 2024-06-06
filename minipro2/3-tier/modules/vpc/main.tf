@@ -217,7 +217,7 @@ data "aws_ami" "ubuntu" {
   
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-5.10-hvm-2.0.*.0-x86_64-gp2"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 
   filter {
@@ -225,7 +225,7 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners           = ["137112412989"]
+  owners           = ["099720109477"]
 
 }
 
@@ -234,13 +234,7 @@ resource "aws_launch_configuration" "myLC" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.mySG.id]
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo yum -y update
-    sudo yum -y install httpd
-    sudo systemctl enable --now httpd
-    echo "<html><body><div>Hello</div></body></html>" > /var/www/html/index.html
-    EOF
+  user_data = file("user_data.sh")
 
   lifecycle {
     create_before_destroy = true
@@ -289,7 +283,7 @@ resource "aws_lb" "myALB" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.mySG.id]
-  subnets            = [aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id,aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id]
+  subnets            = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id,aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id]
 
   tags = {
     Name="myALB"
