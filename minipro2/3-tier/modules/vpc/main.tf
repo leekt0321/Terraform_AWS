@@ -200,7 +200,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
 }
 
 # userdata
-/*data "terraform_remote_state" "my_remote_state" {
+data "terraform_remote_state" "my_remote_state" {
   backend = "s3"
 
   config = {
@@ -209,7 +209,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
     region = "ap-northeast-2"
     dynamodb_table= "myDyDB"
   }
-}*/
+}
 
 # LC
 data "aws_ami" "ubuntu" {
@@ -234,7 +234,10 @@ resource "aws_launch_configuration" "myLC" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.mySG.id]
-  user_data = file("~/tf/minipro2/3-tier/modules/vpc/user_data.sh")
+  user_data = templatefile("~/tf/minipro2/3-tier/modules/vpc/user_data.sh",{
+    db_address = data.terraform_remote_state.my_remote_state.outputs.address,
+    db_port    = data.terraform_remote_state.my_remote_state.outputs.port
+  })
 
   lifecycle {
     create_before_destroy = true
@@ -250,7 +253,7 @@ resource "aws_autoscaling_group" "myASG" {
   health_check_type         = "ELB"
   desired_capacity          = 2
   force_delete              = true
-  vpc_zone_identifier       = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id,aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id]
+  vpc_zone_identifier       = [aws_subnet.myPrivate1.id,aws_subnet.myPrivate2.id]
   target_group_arns = [aws_lb_target_group.myTG.arn]
   depends_on=[aws_lb_target_group.myTG]
 
@@ -283,7 +286,7 @@ resource "aws_lb" "myALB" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.mySG.id]
-  subnets            = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id] # public만 사용한다.(private x)
+  subnets            = [aws_subnet.myPublic1.id,aws_subnet.myPublic2.id] #public만 지정해야함.
 
   tags = {
     Name="myALB"
