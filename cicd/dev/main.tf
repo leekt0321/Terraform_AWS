@@ -1,4 +1,9 @@
 terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+  }
   backend "s3" {
     bucket = "mybucket-lee-1234"
     key = "global/s3/terraform.tfstate"
@@ -13,11 +18,15 @@ provider "aws" {
 
 module "myVPC" {
   source = "../modules/vpc"
-  depends_on = [ module.myDB ]
+  address=module.myDB.address
+  port = module.myDB.port
 }
 
 module "myDB" {
   source = "../modules/db"
   dbuser = "admin"
   dbpassword = "password"
+  myPrivate1_id = module.myVPC.myPrivate1_id
+  myPrivate2_id = module.myVPC.myPrivate2_id
+  vpc_id = module.myVPC.vpc_id
 }

@@ -193,23 +193,19 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
   ip_protocol       = "tcp"
   to_port           = 22
 }
+resource "aws_vpc_security_group_ingress_rule" "allow_db" {
+  security_group_id = aws_security_group.mySG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 3306
+  ip_protocol       = "tcp"
+  to_port           = 3306
+}
 resource "aws_vpc_security_group_egress_rule" "allow_all" {
   security_group_id = aws_security_group.mySG.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-# userdata
-data "terraform_remote_state" "my_remote_state" {
-  backend = "s3"
-
-  config = {
-    bucket="mybucket-lee-1234"
-    key = "global/s3/terraform.tfstate"
-    region = "ap-northeast-2"
-    dynamodb_table= "myDyDB"
-  }
-}
 
 # LC
 data "aws_ami" "ubuntu" {
@@ -234,7 +230,11 @@ resource "aws_launch_configuration" "myLC" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.mySG.id]
-  user_data = file("~/tf/cicd/modules/vpc/user_data.sh")
+  #user_data = file("~/tf/cicd/modules/vpc/user_data.sh")
+  user_data = templatefile("~/tf/cicd/modules/vpc/user_data.sh",{
+    db_address = var.address
+    db_port    = var.port
+  })
 
   lifecycle {
     create_before_destroy = true
@@ -301,4 +301,5 @@ resource "aws_lb_listener" "myListener" {
     target_group_arn = aws_lb_target_group.myTG.arn
   }
 }
+
 
