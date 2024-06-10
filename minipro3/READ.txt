@@ -1,0 +1,8 @@
+인스턴스 만들때
+1) 이름tag에  맞춰서 생성
+2) httpd, codedeploy-agent 잘 실행중인지 확인
+
+
+현재
+beforeinstall에서 안넘어감
+
