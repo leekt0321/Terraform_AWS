@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+files:
+  - source: /deployment.zip
+    destination: /var/www/html
+    overwrite: true
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/unzip_website.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/start_server.sh
+      timeout: 300
+      runas: root
+

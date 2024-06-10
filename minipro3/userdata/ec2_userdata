@@ -1,0 +1,24 @@
+#!/bin/bash
+# Update the instance
+yum update -y
+
+# Install necessary packages
+yum install -y ruby aws-cli
+
+# Install the CodeDeploy agent
+cd /home/ec2-user
+aws s3 cp s3://aws-codedeploy-ap-northeast-2/latest/install . --region ap-northeast-2
+chmod +x ./install
+./install auto
+
+# Start the CodeDeploy agent
+service codedeploy-agent start
+
+# Ensure the CodeDeploy agent starts on reboot
+chkconfig codedeploy-agent on
+
+# Install and start the HTTP server
+yum install -y httpd
+service httpd start
+chkconfig httpd on
+
